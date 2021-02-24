@@ -1,6 +1,5 @@
 package ru.agentlab.changetracking.sail;
 
-import it.uniroma2.art.semanticturkey.changetracking.sail.config.ChangeTrackerFactory;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.sail.Sail;
 import org.eclipse.rdf4j.sail.config.DelegatingSailImplConfig;
@@ -14,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class ChangeTrackingFactory implements SailFactory {
-    private static final Logger logger = LoggerFactory.getLogger(ChangeTrackerFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChangeTrackingFactory.class);
 
     public static final String SAIL_TYPE = "http://agentlab.ru/sail/changetracker";
 

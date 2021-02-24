@@ -1,6 +1,5 @@
 package ru.agentlab.changetracking.sail;
 
-import it.uniroma2.art.semanticturkey.changetracking.sail.config.ChangeTrackerSchema;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.SESAME;

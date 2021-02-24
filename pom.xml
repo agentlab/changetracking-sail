@@ -11,16 +11,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <artifactId>it.uniroma2.art.semanticturkey.changetracking</artifactId>
-                <groupId>ru.agentlab.semanticturkey</groupId>
-                <version>6.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.ontotext.graphdb</groupId>
-                <artifactId>graphdb-free-runtime</artifactId>
-                <version>${graphdb.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>karaf-bom</artifactId>
                 <version>4.3.0</version>
@@ -32,10 +22,6 @@
 
     <dependencies>
         <dependency>
-            <artifactId>it.uniroma2.art.semanticturkey.changetracking</artifactId>
-            <groupId>ru.agentlab.semanticturkey</groupId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.29</version>
@@ -46,21 +32,23 @@
             <type>pom</type>
             <version>3.6.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.cmpn</artifactId>
-            <version>6.0.0</version>
+            <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.annotation</artifactId>
-            <version>6.0.0</version>
+            <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.core</artifactId>
-            <version>6.0.0</version>
+            <version>7.0.0</version>
         </dependency>
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
@@ -71,6 +59,24 @@
             <artifactId>logback-classic</artifactId>
             <version>1.1.11</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.7.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.7.1</version>
+            <scope>test</scope>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.junit.vintage</groupId>-->
+<!--            <artifactId>junit-vintage-engine</artifactId>-->
+<!--            <version>5.7.1</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
     <properties>
@@ -101,25 +107,25 @@
     </build>
 
     <repositories>
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>agentlab-releases</id>
-            <url>https://nexus.agentlab.ru/nexus/repository/maven-releases</url>
-        </repository>
-        <repository>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>agentlab</id>
-            <url>https://nexus.agentlab.ru/nexus/repository/maven-snapshots</url>
-        </repository>
+        <!--        <repository>-->
+        <!--            <releases>-->
+        <!--                <enabled>true</enabled>-->
+        <!--            </releases>-->
+        <!--            <snapshots>-->
+        <!--                <enabled>false</enabled>-->
+        <!--            </snapshots>-->
+        <!--            <id>agentlab-releases</id>-->
+        <!--            <url>https://nexus.agentlab.ru/nexus/repository/maven-releases</url>-->
+        <!--        </repository>-->
+        <!--        <repository>-->
+        <!--            <releases>-->
+        <!--                <enabled>false</enabled>-->
+        <!--            </releases>-->
+        <!--            <snapshots>-->
+        <!--                <enabled>true</enabled>-->
+        <!--            </snapshots>-->
+        <!--            <id>agentlab</id>-->
+        <!--            <url>https://nexus.agentlab.ru/nexus/repository/maven-snapshots</url>-->
+        <!--        </repository>-->
     </repositories>
 </project>

@@ -1,9 +1,5 @@
 package ru.agentlab.changetracking.sail;
 
-import it.uniroma2.art.semanticturkey.changetracking.sail.FlagUpdateHandler;
-import it.uniroma2.art.semanticturkey.changetracking.sail.StagingArea;
-import it.uniroma2.art.semanticturkey.changetracking.sail.UpdateHandler;
-import it.uniroma2.art.semanticturkey.changetracking.vocabulary.CHANGETRACKER;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
@@ -22,10 +18,11 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
     private final Model connectionLocalGraphManagement;
     private final UpdateHandler readOnlyHandler;
     private SailConnectionListener connectionListener;
-    private final ChangeTrackingCallbacks callbacks = new ChangeTrackingCallbacks();
+    private final ChangeTrackingCallbacks callbacks;
 
-    public ChangeTrackerConnection(NotifyingSailConnection wrappedCon, ChangeTracker sail) {
+    public ChangeTrackerConnection(NotifyingSailConnection wrappedCon, ChangeTrackingCallbacks callbacks, ChangeTracker sail) {
         super(wrappedCon);
+        this.callbacks = callbacks;
         this.sail = sail;
         this.stagingArea = new StagingArea();
         this.connectionLocalGraphManagement = null;
@@ -34,11 +31,15 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
     }
 
     public void subscribe(ChangeTrackingCallback callback) {
-        callbacks.subscribe(callback);
+        synchronized (sail) {
+            callbacks.subscribe(callback);
+        }
     }
 
     public void unsubscribe(ChangeTrackingCallback callback) {
-        callbacks.unsubscribe(callback);
+        synchronized (sail) {
+            callbacks.unsubscribe(callback);
+        }
     }
 
     private void initializeListener() {
@@ -111,17 +112,12 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
                 super.commit();
             } else {
                 prepare();
-                sendNotifications();
+                callbacks.onCommit(stagingArea.getAddedStatements(), stagingArea.getRemovedStatements());
                 super.commit();
                 stagingArea.clear();
             }
             readOnlyHandler.clearHandler();
         }
-    }
-
-    private void sendNotifications() {
-        callbacks.notifyStatementsRemoved(stagingArea.getRemovedStatements());
-        callbacks.notifyStatementsAdded(stagingArea.getAddedStatements());
     }
 
     private Model getGraphManagementModel() {
@@ -137,25 +133,11 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
 
         Resource context = st.getContext();
 
-        if (context == null) {
-            context = SESAME.NIL;
-        }
-
-        // A context is included iff it is pulled in by graph inclusions but thrown out by graph exclusions
-
-        if (model.contains(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.INCLUDE_GRAPH, context)
-                || model.contains(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.INCLUDE_GRAPH,
-                                  SESAME.WILDCARD
-        )
-                || model.filter(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.INCLUDE_GRAPH, null)
+        if (model.filter(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.INCLUDE_GRAPH, null)
                 .isEmpty()) {
 
-            if (model.contains(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, context) || model
-                    .contains(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, SESAME.WILDCARD)) {
-                return false;
-            }
-
-            return true;
+            return !model.contains(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, context) && !model
+                    .contains(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, SESAME.WILDCARD);
         }
         return false;
     }

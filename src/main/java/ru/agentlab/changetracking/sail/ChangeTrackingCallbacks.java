@@ -5,30 +5,21 @@ import org.eclipse.rdf4j.model.Statement;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ChangeTrackingCallbacks {
 
     private final Set<ChangeTrackingCallback> callbacks = new HashSet<>();
 
-    public void notifyStatementsRemoved(Collection<Statement> statements) {
-        for (Statement statement : statements) {
-            notifyStatementRemoved(statement);
+    public void onCommit(Set<Statement> addedStatements, Set<Statement> removedStatements) {
+        for (var cb : callbacks) {
+            cb.onCommit(addedStatements, removedStatements);
         }
     }
 
-    public void notifyStatementsAdded(Collection<Statement> statements) {
-        for (Statement statement : statements) {
-            notifyStatementAdded(statement);
-        }
-    }
-
-    public void notifyStatementRemoved(Statement st) {
-        callbacks.forEach(cb -> cb.onStatementRemoved(st));
-    }
-
-    public void notifyStatementAdded(Statement st) {
-        callbacks.forEach(cb -> cb.onStatementAdded(st));
-
+    public void close() {
+        callbacks.clear();
     }
 
     public void subscribe(ChangeTrackingCallback callback) {

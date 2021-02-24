@@ -1,7 +1,6 @@
 package ru.agentlab.changetracking.sail;
 
 import com.google.common.base.MoreObjects;
-import it.uniroma2.art.semanticturkey.changetracking.vocabulary.CHANGETRACKER;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
@@ -22,6 +21,7 @@ public class ChangeTracker extends NotifyingSailWrapper {
     private final Logger logger = LoggerFactory.getLogger(ChangeTracker.class);
     private final LinkedHashModel graphManagement;
     private final Boolean interactiveNotifications;
+    private final ChangeTrackingCallbacks callbacks = new ChangeTrackingCallbacks();
 
     public ChangeTracker(Set<IRI> includeGraph, Set<IRI> excludeGraph, Optional<Boolean> interactiveNotifications) {
         this.graphManagement = new LinkedHashModel();
@@ -38,7 +38,7 @@ public class ChangeTracker extends NotifyingSailWrapper {
     public ChangeTrackerConnection getConnection() throws SailException {
         logger.debug("Obtaining new connection");
         NotifyingSailConnection delegate = super.getConnection();
-        return new ChangeTrackerConnection(delegate, this);
+        return new ChangeTrackerConnection(delegate, callbacks, this);
     }
 
     @Override
