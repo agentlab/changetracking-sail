@@ -1,0 +1,30 @@
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sb:    <http://www.openrdf.org/config/sail/base#>.
+@prefix ns:    <http://www.openrdf.org/config/sail/native#>.
+@prefix rep:   <http://www.openrdf.org/config/repository#>.
+@prefix sr:    <http://www.openrdf.org/config/repository/sail#>.
+@prefix sail:  <http://www.openrdf.org/config/sail#>.
+@prefix owlim: <http://www.ontotext.com/trree/owlim#>.
+@prefix stct:  <http://semanticturkey.uniroma2.it/config/sail/changetracker#>.
+
+[]
+  a rep:Repository ;
+  rep:repositoryID "graphdb-repo" ;
+  rdfs:label "GraphDB Getting Started" ;
+  rep:repositoryImpl [
+    rep:repositoryType "openrdf:SailRepository" ;
+    sr:sailImpl [
+      sail:sailType "http://semanticturkey.uniroma2.it/sail/changetracker" ;
+      stct:excludeGraph <http://www.openrdf.org/schema/sesame#nil> ;
+      stct:historyEnabled true ;
+      stct:historyGraph <http://example.org/history> ;
+      stct:metadataNS "http://example.org/history#" ;
+      stct:supportRepositoryID "support-repo" ;
+      sail:delegate [
+        sail:sailType "openrdf:NativeStore" ;
+        sail:iterationCacheSyncThreshold "10000%" ;
+        ns:tripleIndexes "spoc,posc" ;
+        sb:evaluationStrategyFactory "org.eclipse.rdf4j.query.algebra.evaluation.impl.StrictEvaluationStrategyFactory"
+      ]
+    ]
+  ].
