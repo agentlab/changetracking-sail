@@ -8,6 +8,32 @@
     <artifactId>changetracking-sail</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <maven.compiler.source>15</maven.compiler.source>
+        <maven.compiler.target>15</maven.compiler.target>
+        <reactor.version>3.4.3</reactor.version>
+        <reactivestreams.version>1.0.3</reactivestreams.version>
+        <rdf4j.version>3.6.0</rdf4j.version>
+        <guava.versrion>29.0-jre</guava.versrion>
+        <failureaccess.version>1.0.1</failureaccess.version>
+        <jackson.version>2.12.1</jackson.version>
+        <jsonld.version>0.13.2</jsonld.version>
+        <commons-io.version>1.4</commons-io.version>
+        <httpcore-osgi.version>4.4.14</httpcore-osgi.version>
+        <httpclient-osgi.version>4.5.13</httpclient-osgi.version>
+        <opencsv.version>4.6</opencsv.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <commons-text.version>1.9</commons-text.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
+        <commons-collections.version>3.2.2</commons-collections.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <elasticsearch.version>6.8.14</elasticsearch.version>
+        <spatial4j.version>0.8</spatial4j.version>
+        <jts-core.version>1.18.1</jts-core.version>
+        <mapdb.vesion>1.0.9</mapdb.vesion>
+        <logback.version>1.2.3</logback.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -89,25 +115,38 @@
             <version>5.7.1</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
-    <properties>
-        <maven.compiler.source>15</maven.compiler.source>
-        <maven.compiler.target>15</maven.compiler.target>
-    </properties>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/feature</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/feature</targetPath>
+            </resource>
+        </resources>
         <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
@@ -115,6 +154,15 @@
                         <Export-Package/>
                     </instructions>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
