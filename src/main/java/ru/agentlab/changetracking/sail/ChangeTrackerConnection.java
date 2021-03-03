@@ -8,6 +8,8 @@ import org.eclipse.rdf4j.sail.*;
 import org.eclipse.rdf4j.sail.helpers.NotifyingSailConnectionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
 
 import java.util.List;
 
@@ -18,28 +20,16 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
     private final Model connectionLocalGraphManagement;
     private final UpdateHandler readOnlyHandler;
     private SailConnectionListener connectionListener;
-    private final ChangeTrackingCallbacks callbacks;
+    private final ChangeTrackingEvents eventSource;
 
-    public ChangeTrackerConnection(NotifyingSailConnection wrappedCon, ChangeTrackingCallbacks callbacks, ChangeTracker sail) {
+    public ChangeTrackerConnection(NotifyingSailConnection wrappedCon, ChangeTrackingEvents eventSource, ChangeTracker sail) {
         super(wrappedCon);
-        this.callbacks = callbacks;
+        this.eventSource = eventSource;
         this.sail = sail;
         this.stagingArea = new StagingArea();
         this.connectionLocalGraphManagement = null;
         this.readOnlyHandler = new FlagUpdateHandler();
         initializeListener();
-    }
-
-    public void subscribe(ChangeTrackingCallback callback) {
-        synchronized (sail) {
-            callbacks.subscribe(callback);
-        }
-    }
-
-    public void unsubscribe(ChangeTrackingCallback callback) {
-        synchronized (sail) {
-            callbacks.unsubscribe(callback);
-        }
     }
 
     private void initializeListener() {
@@ -68,6 +58,14 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
         } finally {
             removeConnectionListener(connectionListener);
         }
+    }
+
+    public Flux<TransactionChanges> events() {
+        return eventSource.events();
+    }
+
+    public Flux<TransactionChanges> events(Scheduler scheduler) {
+        return eventSource.events(scheduler);
     }
 
     @Override
@@ -104,20 +102,22 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
 
     @Override
     public void commit() throws SailException {
-        synchronized (sail) {
-            if (readOnlyHandler.isReadOnly()) {
-                stagingArea.clear();
-                super.commit();
-            } else if (stagingArea.isEmpty()) {
-                super.commit();
-            } else {
-                prepare();
-                callbacks.onCommit(stagingArea.getAddedStatements(), stagingArea.getRemovedStatements());
-                super.commit();
-                stagingArea.clear();
-            }
-            readOnlyHandler.clearHandler();
+        if (readOnlyHandler.isReadOnly()) {
+            stagingArea.clear();
+            super.commit();
+            return;
+        } else if (stagingArea.isEmpty()) {
+            super.commit();
+            return;
         }
+        prepare();
+        var changes = new TransactionChanges(stagingArea.getAddedStatements(),
+                                             stagingArea.getRemovedStatements()
+        );
+        super.commit();
+        stagingArea.clear();
+        readOnlyHandler.clearHandler();
+        eventSource.nextEvent(changes);
     }
 
     private Model getGraphManagementModel() {

@@ -21,7 +21,7 @@ public class ChangeTracker extends NotifyingSailWrapper {
     private final Logger logger = LoggerFactory.getLogger(ChangeTracker.class);
     private final LinkedHashModel graphManagement;
     private final Boolean interactiveNotifications;
-    private final ChangeTrackingCallbacks callbacks = new ChangeTrackingCallbacks();
+    private final ChangeTrackingEvents callbacks = new ChangeTrackingEvents();
 
     public ChangeTracker(Set<IRI> includeGraph, Set<IRI> excludeGraph, Optional<Boolean> interactiveNotifications) {
         this.graphManagement = new LinkedHashModel();
@@ -32,6 +32,20 @@ public class ChangeTracker extends NotifyingSailWrapper {
             graphManagement.add(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, g);
         }
         this.interactiveNotifications = interactiveNotifications.orElse(true);
+    }
+
+    @Override
+    public void shutDown() throws SailException {
+        try {
+            super.shutDown();
+        } finally {
+            var res = callbacks.close();
+            if (res.isFailure()) {
+                logger.warn("failed to complete change obsevers");
+            } else {
+                logger.info("Successfully completed observers");
+            }
+        }
     }
 
     @Override
