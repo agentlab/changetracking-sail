@@ -15,13 +15,13 @@ import java.util.Set;
  * @author <a href="fiorelli@info.uniroma2.it">Manuel Fiorelli</a>
  */
 public class StagingArea {
-    private final Set<Statement> addedStatements;
-    private final Set<Statement> removedStatements;
+    private final Model addedStatements;
+    private final Model removedStatements;
     private final Model commitMetadata;
 
     public StagingArea() {
-        addedStatements = new HashSet<>();
-        removedStatements = new HashSet<>();
+        addedStatements = new LinkedHashModel();
+        removedStatements = new LinkedHashModel();
         commitMetadata = new LinkedHashModel();
     }
 
@@ -47,12 +47,12 @@ public class StagingArea {
         removedStatements.add(st);
     }
 
-    public Set<Statement> getAddedStatements() {
-        return Set.copyOf(addedStatements);
+    public Model getAddedStatements() {
+        return new LinkedHashModel(addedStatements);
     }
 
-    public Set<Statement> getRemovedStatements() {
-        return Set.copyOf(removedStatements);
+    public Model getRemovedStatements() {
+        return new LinkedHashModel(removedStatements);
     }
 
     public boolean isEmpty() {

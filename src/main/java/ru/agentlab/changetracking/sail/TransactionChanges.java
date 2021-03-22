@@ -1,24 +1,23 @@
 package ru.agentlab.changetracking.sail;
 
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Model;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class TransactionChanges {
-    private final Set<Statement> addedStatements;
-    private final Set<Statement> removedStatements;
+    private final Model addedStatements;
+    private final Model removedStatements;
 
-    public TransactionChanges(Set<Statement> addedStatements, Set<Statement> removedStatements) {
+    public TransactionChanges(Model addedStatements, Model removedStatements) {
         this.addedStatements = addedStatements;
         this.removedStatements = removedStatements;
     }
 
-    public Set<Statement> getAddedStatements() {
+    public Model getAddedStatements() {
         return addedStatements;
     }
 
-    public Set<Statement> getRemovedStatements() {
+    public Model getRemovedStatements() {
         return removedStatements;
     }
 

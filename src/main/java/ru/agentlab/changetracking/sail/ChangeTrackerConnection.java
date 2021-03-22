@@ -3,6 +3,7 @@ package ru.agentlab.changetracking.sail;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.SESAME;
 import org.eclipse.rdf4j.sail.*;
 import org.eclipse.rdf4j.sail.helpers.NotifyingSailConnectionWrapper;
@@ -111,8 +112,9 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
             return;
         }
         prepare();
-        var changes = new TransactionChanges(stagingArea.getAddedStatements(),
-                                             stagingArea.getRemovedStatements()
+        var changes = new TransactionChanges(
+                stagingArea.getAddedStatements(),
+                stagingArea.getRemovedStatements()
         );
         super.commit();
         stagingArea.clear();
