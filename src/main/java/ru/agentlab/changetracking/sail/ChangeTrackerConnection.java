@@ -3,7 +3,6 @@ package ru.agentlab.changetracking.sail;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.SESAME;
 import org.eclipse.rdf4j.sail.*;
 import org.eclipse.rdf4j.sail.helpers.NotifyingSailConnectionWrapper;
@@ -146,56 +145,48 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
 
     @Override
     public void addStatement(Resource subj, IRI pred, Value obj, Resource... contexts) throws SailException {
-        if (contexts.length == 0) {
-            try {
-                readOnlyHandler.addStatement(subj, pred, obj, contexts);
-                super.addStatement(subj, pred, obj, contexts);
-            } catch (Exception e) {
-                readOnlyHandler.recordCorruption();
-                throw e;
-            }
+        try {
+            readOnlyHandler.addStatement(subj, pred, obj, contexts);
+            super.addStatement(subj, pred, obj, contexts);
+        } catch (Exception e) {
+            readOnlyHandler.recordCorruption();
+            throw e;
         }
     }
 
     @Override
     public void addStatement(UpdateContext modify, Resource subj, IRI pred, Value obj, Resource... contexts)
             throws SailException {
-        if (contexts.length == 0) {
-            try {
-                readOnlyHandler.addStatement(modify, subj, pred, obj, contexts);
-                super.addStatement(modify, subj, pred, obj, contexts);
-            } catch (Exception e) {
-                readOnlyHandler.recordCorruption();
-                throw e;
-            }
+        try {
+            readOnlyHandler.addStatement(modify, subj, pred, obj, contexts);
+            super.addStatement(modify, subj, pred, obj, contexts);
+        } catch (Exception e) {
+            readOnlyHandler.recordCorruption();
+            throw e;
         }
     }
 
     @Override
     public void removeStatements(Resource subj, IRI pred, Value obj, Resource... contexts)
             throws SailException {
-        if (contexts.length == 0) {
-            try {
-                readOnlyHandler.removeStatements(subj, pred, obj, contexts);
-                super.removeStatements(subj, pred, obj, contexts);
-            } catch (Exception e) {
-                readOnlyHandler.recordCorruption();
-                throw e;
-            }
+        try {
+            readOnlyHandler.removeStatements(subj, pred, obj, contexts);
+            super.removeStatements(subj, pred, obj, contexts);
+        } catch (Exception e) {
+            readOnlyHandler.recordCorruption();
+            throw e;
         }
     }
 
     @Override
     public void removeStatement(UpdateContext modify, Resource subj, IRI pred, Value obj, Resource... contexts)
             throws SailException {
-        if (contexts.length == 0) {
-            try {
-                readOnlyHandler.removeStatement(modify, subj, pred, obj, contexts);
-                super.removeStatement(modify, subj, pred, obj, contexts);
-            } catch (Exception e) {
-                readOnlyHandler.recordCorruption();
-                throw e;
-            }
+        try {
+            readOnlyHandler.removeStatement(modify, subj, pred, obj, contexts);
+            super.removeStatement(modify, subj, pred, obj, contexts);
+        } catch (Exception e) {
+            readOnlyHandler.recordCorruption();
+            throw e;
         }
     }
 
