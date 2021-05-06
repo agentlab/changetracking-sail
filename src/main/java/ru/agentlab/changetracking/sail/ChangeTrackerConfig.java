@@ -2,7 +2,7 @@ package ru.agentlab.changetracking.sail;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Values;
-import org.eclipse.rdf4j.model.vocabulary.SESAME;
+import org.eclipse.rdf4j.model.vocabulary.RDF4J;
 import org.eclipse.rdf4j.sail.config.AbstractDelegatingSailImplConfig;
 import org.eclipse.rdf4j.sail.config.SailConfigException;
 import org.eclipse.rdf4j.sail.config.SailImplConfig;
@@ -25,7 +25,7 @@ public class ChangeTrackerConfig extends AbstractDelegatingSailImplConfig {
     public ChangeTrackerConfig(SailImplConfig delegate) {
         super(ChangeTrackingFactory.SAIL_TYPE, delegate);
         includeGraph = Collections.emptySet();
-        excludeGraph = Collections.singleton(SESAME.NIL);
+        excludeGraph = Collections.singleton(RDF4J.NIL);
         interactiveNotifications = null;
     }
 

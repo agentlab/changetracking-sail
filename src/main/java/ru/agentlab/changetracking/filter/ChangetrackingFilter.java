@@ -2,7 +2,6 @@ package ru.agentlab.changetracking.filter;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import reactor.core.publisher.Mono;
 import ru.agentlab.changetracking.sail.TransactionChanges;
 
 import java.util.*;
