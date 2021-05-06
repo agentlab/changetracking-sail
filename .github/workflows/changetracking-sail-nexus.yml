@@ -1,0 +1,19 @@
+name: Publish package to the Maven Central Repository
+on: [push]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v2
+        with:
+          java-version: '15'
+          distribution: 'adopt'
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+      - name: Publish package
+        run: mvn -ntp -s settings.xml clean deploy -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.AGENTLAB_NEXUS_PASSWORD }}
+          MAVEN_PASSWORD: ${{ secrets.AGENTLAB_NEXUS_USERNAME }}
