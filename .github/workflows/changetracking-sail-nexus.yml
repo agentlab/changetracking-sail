@@ -13,7 +13,7 @@ jobs:
       - name: Prepare settings.xml
         run: envsubst < settings.xml.template > settings.xml
         env:
-          MAVEN_USERNAME: ${{ secrets.AGENTLAB_NEXUS_PASSWORD }}
-          MAVEN_PASSWORD: ${{ secrets.AGENTLAB_NEXUS_USERNAME }}
+          MAVEN_USERNAME: ${{ secrets.AGENTLAB_NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.AGENTLAB_NEXUS_PASSWORD }}
       - name: Publish package
         run: mvn -ntp -s settings.xml clean deploy -DskipTests
