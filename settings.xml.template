@@ -7,9 +7,13 @@
     <servers>
         <server>
             <id>agentlab-snapshots</id>
+            <username>${MAVEN_USERNAME}</username>
+            <password>${MAVEN_PASSWORD}</password>
         </server>
         <server>
             <id>agentlab-releases</id>
+            <username>${MAVEN_USERNAME}</username>
+            <password>${MAVEN_PASSWORD}</password>
         </server>
     </servers>
     <mirrors/>
