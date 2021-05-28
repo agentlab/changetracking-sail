@@ -22,7 +22,9 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
     private SailConnectionListener connectionListener;
     private final ChangeTrackingEvents eventSource;
 
-    public ChangeTrackerConnection(NotifyingSailConnection wrappedCon, ChangeTrackingEvents eventSource, ChangeTracker sail) {
+    public ChangeTrackerConnection(NotifyingSailConnection wrappedCon,
+                                   ChangeTrackingEvents eventSource,
+                                   ChangeTracker sail) {
         super(wrappedCon);
         this.eventSource = eventSource;
         this.sail = sail;
@@ -53,11 +55,8 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
 
     @Override
     public void close() throws SailException {
-        try {
-            super.close();
-        } finally {
-            removeConnectionListener(connectionListener);
-        }
+        removeConnectionListener(connectionListener);
+        super.close();
     }
 
     public Flux<TransactionChanges> events() {
@@ -75,8 +74,9 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
         }
 
         List<IsolationLevel> supportedIsolationLevels = sail.getSupportedIsolationLevels();
-        IsolationLevel compatibleLevel = IsolationLevels.getCompatibleIsolationLevel(level,
-                                                                                     supportedIsolationLevels
+        IsolationLevel compatibleLevel = IsolationLevels.getCompatibleIsolationLevel(
+                level,
+                supportedIsolationLevels
         );
         if (compatibleLevel == null) {
             throw new UnknownSailTransactionStateException("Isolation level " + level
@@ -118,7 +118,10 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
         super.commit();
         stagingArea.clear();
         readOnlyHandler.clearHandler();
-        eventSource.nextEvent(changes);
+        var result = eventSource.nextEvent(changes);
+        if (result.isFailure()) {
+            logger.debug("fail to emit next changes {}", result);
+        }
     }
 
     private Model getGraphManagementModel() {
@@ -135,7 +138,7 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
         Resource context = st.getContext();
 
         if (model.filter(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.INCLUDE_GRAPH, null)
-                .isEmpty()) {
+                 .isEmpty()) {
 
             return !model.contains(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, context) && !model
                     .contains(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, SESAME.WILDCARD);
