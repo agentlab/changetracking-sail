@@ -64,22 +64,22 @@ public class ChangetrackingFilter {
 
     public Optional<TransactionChanges> mapIfAnyMatches(TransactionChanges changes) {
         Model added = patterns.stream()
-                .filter(this::filtersAddedStatements)
-                .map(p -> changes.getAddedStatements()
-                        .filter(p.getSubject(), p.getPredicate(), p.getObject()))
-                .reduce(new LinkedHashModel(), (merged, model) -> {
-                    merged.addAll(model);
-                    return merged;
-                });
+                              .filter(this::filtersAddedStatements)
+                              .map(p -> changes.getAddedStatements()
+                                               .filter(p.getSubject(), p.getPredicate(), p.getObject()))
+                              .reduce(new LinkedHashModel(), (merged, model) -> {
+                                  merged.addAll(model);
+                                  return merged;
+                              });
 
         Model removed = patterns.stream()
-                .filter(this::filtersRemovedStatements)
-                .map(p -> changes.getRemovedStatements()
-                        .filter(p.getSubject(), p.getPredicate(), p.getObject()))
-                .reduce(new LinkedHashModel(), (merged, model) -> {
-                    merged.addAll(model);
-                    return merged;
-                });
+                                .filter(this::filtersRemovedStatements)
+                                .map(p -> changes.getRemovedStatements()
+                                                 .filter(p.getSubject(), p.getPredicate(), p.getObject()))
+                                .reduce(new LinkedHashModel(), (merged, model) -> {
+                                    merged.addAll(model);
+                                    return merged;
+                                });
 
         if (added.isEmpty() && removed.isEmpty()) {
             return Optional.empty();
@@ -103,19 +103,19 @@ public class ChangetrackingFilter {
         Model added = new LinkedHashModel();
         Model removed = new LinkedHashModel();
         for (Pattern pattern : patterns) {
+            boolean matched = false;
             if (filtersAddedStatements(pattern)) {
                 var matches = filterStatements(changes.getAddedStatements(), pattern);
-                if (matches.size() == 0) {
-                    return Optional.empty();
-                }
+                matched = !matches.isEmpty();
                 added.addAll(matches);
             }
             if (filtersRemovedStatements(pattern)) {
                 var matches = filterStatements(changes.getRemovedStatements(), pattern);
-                if (matches.size() == 0) {
-                    return Optional.empty();
-                }
+                matched = matched || !matches.isEmpty();
                 removed.addAll(matches);
+            }
+            if (!matched) {
+                return Optional.empty();
             }
         }
         return Optional.of(new TransactionChanges(added, removed));
