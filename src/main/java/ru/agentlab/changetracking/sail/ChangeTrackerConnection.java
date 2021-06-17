@@ -73,17 +73,7 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
             level = sail.getDefaultIsolationLevel();
         }
 
-        List<IsolationLevel> supportedIsolationLevels = sail.getSupportedIsolationLevels();
-        IsolationLevel compatibleLevel = IsolationLevels.getCompatibleIsolationLevel(
-                level,
-                supportedIsolationLevels
-        );
-        if (compatibleLevel == null) {
-            throw new UnknownSailTransactionStateException("Isolation level " + level
-                                                                   + " not compatible with this Sail. Supported levels are: " + supportedIsolationLevels);
-        }
-        super.begin(compatibleLevel);
-
+        super.begin(level);
         stagingArea.clear();
         readOnlyHandler.clearHandler();
         logger.debug("Transaction Begin / Isolation Level = {}", level);

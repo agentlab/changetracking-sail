@@ -28,7 +28,9 @@ public class ChangeTrackingEvents {
     }
 
     public Sinks.EmitResult close() {
-        return sink.tryEmitComplete();
+        var result = sink.tryEmitComplete();
+        defaultScheduler.dispose();
+        return result;
     }
 
 }

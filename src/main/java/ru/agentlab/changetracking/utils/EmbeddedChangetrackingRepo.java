@@ -26,9 +26,9 @@ public class EmbeddedChangetrackingRepo implements Closeable {
         repositoryManager.init();
 
         ChangeTrackerConfig trackerConfig = new ChangeTrackerConfig(new NativeStoreConfig());
-        trackerConfig.setInteractiveNotifications(true);
-        repositoryManager.addRepositoryConfig(new RepositoryConfig(repoID,
-                                                                   new SailRepositoryConfig(trackerConfig)
+        repositoryManager.addRepositoryConfig(new RepositoryConfig(
+                repoID,
+                new SailRepositoryConfig(trackerConfig)
         ));
         repo = (SailRepository) repositoryManager.getRepository(repoID);
     }

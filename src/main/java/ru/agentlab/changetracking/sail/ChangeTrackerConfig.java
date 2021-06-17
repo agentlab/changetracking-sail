@@ -9,14 +9,12 @@ import org.eclipse.rdf4j.sail.config.SailImplConfig;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ChangeTrackerConfig extends AbstractDelegatingSailImplConfig {
     private Set<IRI> includeGraph;
     private Set<IRI> excludeGraph;
-    private Boolean interactiveNotifications;
 
     public ChangeTrackerConfig() {
         this(null);
@@ -26,19 +24,6 @@ public class ChangeTrackerConfig extends AbstractDelegatingSailImplConfig {
         super(ChangeTrackingFactory.SAIL_TYPE, delegate);
         includeGraph = Collections.emptySet();
         excludeGraph = Collections.singleton(RDF4J.NIL);
-        interactiveNotifications = null;
-    }
-
-    public Boolean getInteractiveNotifications() {
-        return interactiveNotifications;
-    }
-
-    public void setInteractiveNotifications(Boolean interactiveNotifications) {
-        this.interactiveNotifications = interactiveNotifications;
-    }
-
-    public Optional<Boolean> isInteractiveNotifications() {
-        return Optional.ofNullable(interactiveNotifications);
     }
 
     public Set<IRI> getIncludeGraph() {
@@ -66,12 +51,6 @@ public class ChangeTrackerConfig extends AbstractDelegatingSailImplConfig {
         for (IRI g : excludeGraph) {
             graph.add(implNode, ChangeTrackerSchema.EXCLUDE_GRAPH, Values.literal(g));
         }
-        if (interactiveNotifications != null) {
-            graph.add(implNode,
-                      ChangeTrackerSchema.INTERACTIVE_NOTIFICATIONS,
-                      Values.literal(interactiveNotifications)
-            );
-        }
         return implNode;
     }
 
@@ -79,28 +58,17 @@ public class ChangeTrackerConfig extends AbstractDelegatingSailImplConfig {
     public void parse(Model graph, Resource implNode) throws SailConfigException {
         super.parse(graph, implNode);
         includeGraph = graph.filter(implNode, ChangeTrackerSchema.INCLUDE_GRAPH, null)
-                .stream()
-                .map(Statement::getObject)
-                .filter(obj -> obj instanceof IRI)
-                .map(obj -> (IRI) obj)
-                .collect(Collectors.toSet());
+                            .stream()
+                            .map(Statement::getObject)
+                            .filter(obj -> obj instanceof IRI)
+                            .map(obj -> (IRI) obj)
+                            .collect(Collectors.toSet());
 
         excludeGraph = graph.filter(implNode, ChangeTrackerSchema.EXCLUDE_GRAPH, null)
-                .stream()
-                .map(Statement::getObject)
-                .filter(obj -> obj instanceof IRI)
-                .map(obj -> (IRI) obj)
-                .collect(Collectors.toSet());
-
-
-        Set<Value> interactiveNotificationsGraph = graph
-                .filter(implNode, ChangeTrackerSchema.INTERACTIVE_NOTIFICATIONS, null).objects();
-        if (interactiveNotificationsGraph.contains(Values.literal(true))) {
-            interactiveNotifications = true;
-        } else if (interactiveNotificationsGraph.contains(Values.literal(false))) {
-            interactiveNotifications = false;
-        } else {
-            interactiveNotifications = null;
-        }
+                            .stream()
+                            .map(Statement::getObject)
+                            .filter(obj -> obj instanceof IRI)
+                            .map(obj -> (IRI) obj)
+                            .collect(Collectors.toSet());
     }
 }

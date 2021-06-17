@@ -12,18 +12,14 @@ import org.eclipse.rdf4j.sail.helpers.NotifyingSailWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ChangeTracker extends NotifyingSailWrapper {
     private final Logger logger = LoggerFactory.getLogger(ChangeTracker.class);
     private final LinkedHashModel graphManagement;
-    private final Boolean interactiveNotifications;
     private final ChangeTrackingEvents callbacks = new ChangeTrackingEvents();
 
-    public ChangeTracker(Set<IRI> includeGraph, Set<IRI> excludeGraph, Optional<Boolean> interactiveNotifications) {
+    public ChangeTracker(Set<IRI> includeGraph, Set<IRI> excludeGraph) {
         this.graphManagement = new LinkedHashModel();
         for (IRI g : includeGraph) {
             graphManagement.add(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.INCLUDE_GRAPH, g);
@@ -31,21 +27,17 @@ public class ChangeTracker extends NotifyingSailWrapper {
         for (IRI g : excludeGraph) {
             graphManagement.add(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, g);
         }
-        this.interactiveNotifications = interactiveNotifications.orElse(true);
     }
 
     @Override
     public void shutDown() throws SailException {
-        try {
-            super.shutDown();
-        } finally {
-            var res = callbacks.close();
-            if (res.isFailure()) {
-                logger.warn("failed to complete change obsevers");
-            } else {
-                logger.info("Successfully completed observers");
-            }
+        var res = callbacks.close();
+        if (res.isFailure()) {
+            logger.warn("failed to complete change obsevers");
+        } else {
+            logger.info("Successfully completed observers");
         }
+        super.shutDown();
     }
 
     @Override
@@ -53,39 +45,6 @@ public class ChangeTracker extends NotifyingSailWrapper {
         logger.debug("Obtaining new connection");
         NotifyingSailConnection delegate = super.getConnection();
         return new ChangeTrackerConnection(delegate, callbacks, this);
-    }
-
-    @Override
-    public IsolationLevel getDefaultIsolationLevel() {
-        IsolationLevel isolationLevel = super.getDefaultIsolationLevel();
-
-        if (!interactiveNotifications) {
-            return isolationLevel;
-        } else {
-            if (isolationLevel.isCompatibleWith(IsolationLevels.SERIALIZABLE)) {
-                return isolationLevel;
-            } else {
-                return MoreObjects.firstNonNull(
-                        IsolationLevels.getCompatibleIsolationLevel(IsolationLevels.SERIALIZABLE,
-                                                                    super.getSupportedIsolationLevels()
-                        ),
-                        IsolationLevels.SERIALIZABLE
-                );
-            }
-        }
-    }
-
-    @Override
-    public List<IsolationLevel> getSupportedIsolationLevels() {
-        List<IsolationLevel> supportedByDelegate = super.getSupportedIsolationLevels();
-
-        if (!interactiveNotifications) {
-            return supportedByDelegate;
-        } else {
-            return supportedByDelegate.stream()
-                    .filter(level -> level.isCompatibleWith(IsolationLevels.SERIALIZABLE))
-                    .collect(Collectors.toList());
-        }
     }
 
     public Model getGraphManagement() {
