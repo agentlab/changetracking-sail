@@ -8,7 +8,7 @@ jobs:
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v2
         with:
-          java-version: '15'
+          java-version: '16'
           distribution: 'adopt'
       - name: Prepare settings.xml
         run: envsubst < settings.xml.template > settings.xml
