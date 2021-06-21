@@ -9,12 +9,6 @@ import java.util.*;
 public class ChangetrackingFilter {
     private final MatchingStrategy strategy;
 
-    public enum Filtering {
-        ADDED,
-        REMOVED,
-        ALL
-    }
-
     public enum MatchingStrategy {
         ALL_PATTERNS,
         ANY_PATTERN
@@ -27,8 +21,24 @@ public class ChangetrackingFilter {
         public Builder addPattern(Resource subject,
                                   IRI predicate,
                                   Value object,
-                                  ChangetrackingFilter.Filtering filtering) {
-            return addPattern(new Pattern(subject, predicate, object, filtering));
+                                  Filtering filtering) {
+            return addPattern(new Pattern(subject, predicate, object, filtering, new ArrayList<>()));
+        }
+
+        public Builder addPattern(Resource subject,
+                                  IRI predicate,
+                                  Value object,
+                                  Filtering filtering,
+                                  SubPattern... subpatterns) {
+            return addPattern(new Pattern(subject, predicate, object, filtering, Arrays.asList(subpatterns)));
+        }
+
+        public Builder addPattern(Resource subject,
+                                  IRI predicate,
+                                  Value object,
+                                  Filtering filtering,
+                                  List<SubPattern> subpatterns) {
+            return addPattern(new Pattern(subject, predicate, object, filtering, subpatterns));
         }
 
         public Builder addPattern(Pattern pattern) {
@@ -65,8 +75,7 @@ public class ChangetrackingFilter {
     public Optional<TransactionChanges> mapIfAnyMatches(TransactionChanges changes) {
         Model added = patterns.stream()
                               .filter(this::filtersAddedStatements)
-                              .map(p -> changes.getAddedStatements()
-                                               .filter(p.getSubject(), p.getPredicate(), p.getObject()))
+                              .map(p -> p.filter(changes.getAddedStatements()))
                               .reduce(new LinkedHashModel(), (merged, model) -> {
                                   merged.addAll(model);
                                   return merged;
@@ -74,8 +83,7 @@ public class ChangetrackingFilter {
 
         Model removed = patterns.stream()
                                 .filter(this::filtersRemovedStatements)
-                                .map(p -> changes.getRemovedStatements()
-                                                 .filter(p.getSubject(), p.getPredicate(), p.getObject()))
+                                .map(p -> p.filter(changes.getRemovedStatements()))
                                 .reduce(new LinkedHashModel(), (merged, model) -> {
                                     merged.addAll(model);
                                     return merged;
@@ -88,15 +96,11 @@ public class ChangetrackingFilter {
     }
 
     private boolean filtersAddedStatements(Pattern pattern) {
-        return pattern.getFiltering().equals(Filtering.ADDED) || pattern.getFiltering().equals(Filtering.ALL);
+        return pattern.filtering().equals(Filtering.ADDED) || pattern.filtering().equals(Filtering.ALL);
     }
 
     private boolean filtersRemovedStatements(Pattern pattern) {
-        return pattern.getFiltering().equals(Filtering.REMOVED) || pattern.getFiltering().equals(Filtering.ALL);
-    }
-
-    private Model filterStatements(Model statements, Pattern pattern) {
-        return statements.filter(pattern.getSubject(), pattern.getPredicate(), pattern.getObject());
+        return pattern.filtering().equals(Filtering.REMOVED) || pattern.filtering().equals(Filtering.ALL);
     }
 
     public Optional<TransactionChanges> mapIfAllMatches(TransactionChanges changes) {
@@ -105,12 +109,12 @@ public class ChangetrackingFilter {
         for (Pattern pattern : patterns) {
             boolean matched = false;
             if (filtersAddedStatements(pattern)) {
-                var matches = filterStatements(changes.getAddedStatements(), pattern);
+                var matches = pattern.filter(changes.getAddedStatements());
                 matched = !matches.isEmpty();
                 added.addAll(matches);
             }
             if (filtersRemovedStatements(pattern)) {
-                var matches = filterStatements(changes.getRemovedStatements(), pattern);
+                var matches = pattern.filter(changes.getRemovedStatements());
                 matched = matched || !matches.isEmpty();
                 removed.addAll(matches);
             }
@@ -123,7 +127,7 @@ public class ChangetrackingFilter {
 
     public Optional<Model> matchModel(Model model) {
         for (Pattern pattern : patterns) {
-            if (model.filter(pattern.getSubject(), pattern.getPredicate(), pattern.getObject()).size() == 0) {
+            if (model.filter(pattern.subject(), pattern.predicate(), pattern.object()).size() == 0) {
                 return Optional.empty();
             }
         }
