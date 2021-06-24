@@ -32,9 +32,6 @@ public record Pattern(Resource subject, IRI predicate, Value object, Filtering f
                 if (fromSubpattern.size() == 0) {
                     return fromSubpattern;
                 }
-                if (subpattern.isCollector()) {
-                    fromRoot.addAll(fromSubpattern);
-                }
             }
         }
         return fromRoot;
