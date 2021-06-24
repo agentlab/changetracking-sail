@@ -12,9 +12,10 @@
 
     <groupId>ru.agentlab</groupId>
     <artifactId>changetracking-sail</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
 
     <properties>
+        <revision>1.0.2-SNAPSHOT</revision>
         <reactor.version>3.4.3</reactor.version>
         <reactivestreams.version>1.0.3</reactivestreams.version>
     </properties>
