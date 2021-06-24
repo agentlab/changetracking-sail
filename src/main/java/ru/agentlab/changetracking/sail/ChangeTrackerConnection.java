@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 
-import java.util.List;
 
 public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
     private static final Logger logger = LoggerFactory.getLogger(ChangeTrackerConnection.class);
