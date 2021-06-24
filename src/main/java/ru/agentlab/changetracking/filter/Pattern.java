@@ -6,18 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record Pattern(Resource subject, IRI predicate, Value object, Filtering filtering,
-                      List<SubPattern> subPatterns) {
+                      List<SubPattern> subPatterns, IRI... contexts) {
 
     public Pattern(Statement statement, Filtering filtering) {
         this(statement.getSubject(), statement.getPredicate(), statement.getObject(), filtering, new ArrayList<>());
     }
 
-    private static boolean nullOrEquals(Value left, Value right) {
-        return left == null || left.equals(right);
-    }
-
     public Model filter(Model statements) {
-        Model fromRoot = statements.filter(subject(), predicate(), object());
+        Model fromRoot;
+        if (contexts != null && contexts.length == 0) {
+            fromRoot = statements.filter(subject, predicate, object);
+        } else {
+            fromRoot = statements.filter(subject, predicate, object, contexts);
+        }
         if (fromRoot.size() == 0) {
             return fromRoot;
         }
