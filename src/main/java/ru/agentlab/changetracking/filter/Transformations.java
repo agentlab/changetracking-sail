@@ -9,6 +9,9 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,6 +24,36 @@ public class Transformations {
                                  HashMap::new,
                                  Collectors.toCollection(LinkedHashModel::new)
                          ));
+    }
+
+    public static <T> Stream<T> groupBySubjectFromOrdered(Iterable<Statement> statements,
+                                                          Supplier<T> containerSupplier,
+                                                          BiConsumer<T, Statement> containerAdd) {
+        var iter = statements.iterator();
+        if (!iter.hasNext()) {
+            return Stream.empty();
+        }
+        var builder = Stream.<T>builder();
+        var st = iter.next();
+        var currentSubj = st.getSubject();
+        T container = containerSupplier.get();
+        containerAdd.accept(container, st);
+        while (iter.hasNext()) {
+            st = iter.next();
+            var subj = st.getSubject();
+            if (!subj.equals(currentSubj)) {
+                builder.accept(container);
+                container = containerSupplier.get();
+                currentSubj = subj;
+            }
+            containerAdd.accept(container, st);
+        }
+        builder.accept(container);
+        return builder.build();
+    }
+
+    public static Stream<Model> groupBySubjectFromOrdered(Iterable<Statement> statements) {
+        return groupBySubjectFromOrdered(statements, LinkedHashModel::new, Set::add);
     }
 
 
