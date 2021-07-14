@@ -1,28 +1,36 @@
 package ru.agentlab.changetracking.filter;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import ru.agentlab.changetracking.sail.TransactionChanges;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class ChangetrackingFilter {
     private final MatchingStrategy strategy;
 
-    public enum MatchingStrategy {
-        ALL_PATTERNS,
-        ANY_PATTERN
-    }
-
     public static class Builder {
-        private List<Pattern> patterns = new ArrayList<>();
+        private List<FilteringPattern> patterns = new ArrayList<>();
         private MatchingStrategy strategy = MatchingStrategy.ALL_PATTERNS;
 
         public Builder addPattern(Resource subject,
                                   IRI predicate,
                                   Value object,
                                   Filtering filtering) {
-            return addPattern(new Pattern(subject, predicate, object, filtering, new ArrayList<>()));
+            return addPattern(new Pattern(
+                    subject,
+                    predicate,
+                    object,
+                    filtering,
+                    MatchingStrategy.ALL_PATTERNS,
+                    List.of()
+            ));
         }
 
         public Builder addPattern(Resource subject,
@@ -30,7 +38,12 @@ public class ChangetrackingFilter {
                                   Value object,
                                   Filtering filtering,
                                   SubPattern... subpatterns) {
-            return addPattern(new Pattern(subject, predicate, object, filtering, Arrays.asList(subpatterns)));
+            return addPattern(new Pattern(
+                    subject, predicate, object,
+                    filtering,
+                    MatchingStrategy.ALL_PATTERNS,
+                    Arrays.asList(subpatterns)
+            ));
         }
 
         public Builder addPattern(Resource subject,
@@ -38,15 +51,20 @@ public class ChangetrackingFilter {
                                   Value object,
                                   Filtering filtering,
                                   List<SubPattern> subpatterns) {
-            return addPattern(new Pattern(subject, predicate, object, filtering, subpatterns));
+            return addPattern(new Pattern(
+                    subject, predicate, object,
+                    filtering,
+                    MatchingStrategy.ALL_PATTERNS,
+                    subpatterns
+            ));
         }
 
-        public Builder addPattern(Pattern pattern) {
+        public Builder addPattern(FilteringPattern pattern) {
             patterns.add(pattern);
             return this;
         }
 
-        public Builder setPatterns(List<Pattern> patterns) {
+        public Builder setPatterns(List<FilteringPattern> patterns) {
             this.patterns = patterns;
             return this;
         }
@@ -61,9 +79,9 @@ public class ChangetrackingFilter {
         }
     }
 
-    private final List<Pattern> patterns;
+    private final List<FilteringPattern> patterns;
 
-    private ChangetrackingFilter(List<Pattern> patterns, MatchingStrategy strategy) {
+    private ChangetrackingFilter(List<FilteringPattern> patterns, MatchingStrategy strategy) {
         this.patterns = patterns;
         this.strategy = strategy;
     }
@@ -95,18 +113,18 @@ public class ChangetrackingFilter {
         return Optional.of(new TransactionChanges(added, removed));
     }
 
-    private boolean filtersAddedStatements(Pattern pattern) {
+    private boolean filtersAddedStatements(FilteringPattern pattern) {
         return pattern.filtering().equals(Filtering.ADDED) || pattern.filtering().equals(Filtering.ALL);
     }
 
-    private boolean filtersRemovedStatements(Pattern pattern) {
+    private boolean filtersRemovedStatements(FilteringPattern pattern) {
         return pattern.filtering().equals(Filtering.REMOVED) || pattern.filtering().equals(Filtering.ALL);
     }
 
     public Optional<TransactionChanges> mapIfAllMatches(TransactionChanges changes) {
         Model added = new LinkedHashModel();
         Model removed = new LinkedHashModel();
-        for (Pattern pattern : patterns) {
+        for (var pattern : patterns) {
             boolean matched = false;
             if (filtersAddedStatements(pattern)) {
                 var matches = pattern.filter(changes.getAddedStatements());
@@ -126,8 +144,8 @@ public class ChangetrackingFilter {
     }
 
     public Optional<Model> matchModel(Model model) {
-        for (Pattern pattern : patterns) {
-            if (model.filter(pattern.subject(), pattern.predicate(), pattern.object()).size() == 0) {
+        for (var pattern : patterns) {
+            if (pattern.filter(model).size() == 0) {
                 return Optional.empty();
             }
         }

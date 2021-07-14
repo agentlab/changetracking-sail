@@ -1,15 +1,46 @@
 package ru.agentlab.changetracking.filter;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public record Pattern(Resource subject, IRI predicate, Value object, Filtering filtering,
-                      List<SubPattern> subPatterns, IRI... contexts) {
+                      MatchingStrategy subPatternsFiltering,
+                      List<SubPattern> subPatterns, IRI... contexts) implements FilteringPattern {
+
+    public Pattern(Resource subject, IRI predicate, Value object, Filtering filtering) {
+        this(
+                subject,
+                predicate,
+                object,
+                filtering,
+                MatchingStrategy.ALL_PATTERNS,
+                new ArrayList<>()
+        );
+    }
 
     public Pattern(Statement statement, Filtering filtering) {
-        this(statement.getSubject(), statement.getPredicate(), statement.getObject(), filtering, new ArrayList<>());
+        this(
+                statement.getSubject(),
+                statement.getPredicate(),
+                statement.getObject(),
+                filtering,
+                MatchingStrategy.ALL_PATTERNS,
+                new ArrayList<>()
+        );
+    }
+
+    public Pattern(Statement statement, Filtering filtering, List<SubPattern> subPatterns) {
+        this(
+                statement.getSubject(),
+                statement.getPredicate(),
+                statement.getObject(),
+                filtering,
+                MatchingStrategy.ALL_PATTERNS,
+                subPatterns
+        );
     }
 
     public Model filter(Model statements) {
@@ -22,6 +53,7 @@ public record Pattern(Resource subject, IRI predicate, Value object, Filtering f
         if (fromRoot.size() == 0) {
             return fromRoot;
         }
+        boolean anySubpatternMatched = subPatterns.size() == 0;
         for (Statement matchedWithRoot : fromRoot) {
             for (SubPattern subpattern : subPatterns) {
                 var fromSubpattern = statements.filter(
@@ -30,9 +62,16 @@ public record Pattern(Resource subject, IRI predicate, Value object, Filtering f
                         subpattern.object()
                 );
                 if (fromSubpattern.size() == 0) {
-                    return fromSubpattern;
+                    if (subPatternsFiltering.equals(MatchingStrategy.ALL_PATTERNS)) {
+                        return fromSubpattern;
+                    }
+                } else {
+                    anySubpatternMatched = true;
                 }
             }
+        }
+        if (!anySubpatternMatched) {
+            return new LinkedHashModel();
         }
         return fromRoot;
     }
