@@ -11,7 +11,7 @@ public class ChangeTrackingEvents {
     private final Scheduler defaultScheduler;
 
     public ChangeTrackingEvents() {
-        sink = Sinks.many().multicast().directBestEffort();
+        sink = Sinks.many().multicast().onBackpressureBuffer();
         defaultScheduler = Schedulers.newSingle("changetracking");
     }
 
