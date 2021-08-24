@@ -19,6 +19,18 @@ public class ChangetrackingFilter {
         private List<FilteringPattern> patterns = new ArrayList<>();
         private MatchingStrategy strategy = MatchingStrategy.ALL_PATTERNS;
 
+        public Builder addPropertyPattern(IRI predicate,
+                                          Value object,
+                                          Filtering filtering) {
+            return addPattern(new PropertyPattern(
+                    predicate,
+                    object,
+                    filtering,
+                    MatchingStrategy.ALL_PATTERNS,
+                    List.of()
+            ));
+        }
+
         public Builder addPattern(Resource subject,
                                   IRI predicate,
                                   Value object,
