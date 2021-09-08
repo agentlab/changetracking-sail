@@ -1,6 +1,7 @@
 package ru.agentlab.changetracking.sail;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.RDF4J;
 import org.eclipse.rdf4j.sail.config.AbstractDelegatingSailImplConfig;
@@ -13,8 +14,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ChangeTrackerConfig extends AbstractDelegatingSailImplConfig {
+    public final static int DEFAULT_EVENTS_QUEUE_BUFFER_SIZE = 64;
     private Set<IRI> includeGraph;
     private Set<IRI> excludeGraph;
+    private int eventsQueueBufferSize = DEFAULT_EVENTS_QUEUE_BUFFER_SIZE;
 
     public ChangeTrackerConfig() {
         this(null);
@@ -40,6 +43,14 @@ public class ChangeTrackerConfig extends AbstractDelegatingSailImplConfig {
 
     public void setExcludeGraph(Set<IRI> excludeGraph) {
         this.excludeGraph = new HashSet<>(excludeGraph);
+    }
+
+    public int getEventsQueueBufferSize() {
+        return eventsQueueBufferSize;
+    }
+
+    public void setEventsQueueBufferSize(int eventsQueueBufferSize) {
+        this.eventsQueueBufferSize = eventsQueueBufferSize;
     }
 
     @Override

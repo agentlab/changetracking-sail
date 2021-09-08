@@ -17,9 +17,9 @@ import java.util.Set;
 public class ChangeTracker extends NotifyingSailWrapper {
     private final Logger logger = LoggerFactory.getLogger(ChangeTracker.class);
     private final LinkedHashModel graphManagement;
-    private final ChangeTrackingEvents callbacks = new ChangeTrackingEvents();
+    private final ChangeTrackingEvents callbacks;
 
-    public ChangeTracker(Set<IRI> includeGraph, Set<IRI> excludeGraph) {
+    public ChangeTracker(Set<IRI> includeGraph, Set<IRI> excludeGraph, int eventsBufferSize) {
         this.graphManagement = new LinkedHashModel();
         for (IRI g : includeGraph) {
             graphManagement.add(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.INCLUDE_GRAPH, g);
@@ -27,6 +27,8 @@ public class ChangeTracker extends NotifyingSailWrapper {
         for (IRI g : excludeGraph) {
             graphManagement.add(CHANGETRACKER.GRAPH_MANAGEMENT, CHANGETRACKER.EXCLUDE_GRAPH, g);
         }
+
+        callbacks = new ChangeTrackingEvents(eventsBufferSize);
     }
 
     @Override

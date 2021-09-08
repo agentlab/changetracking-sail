@@ -33,7 +33,7 @@ public class ChangeTrackingFactory implements SailFactory {
         ChangeTrackerConfig config = (ChangeTrackerConfig) parentConfig;
         Set<IRI> includedGraph = config.getIncludeGraph();
         Set<IRI> excludedGraph = config.getExcludeGraph();
-        return new ChangeTracker(includedGraph, excludedGraph);
+        return new ChangeTracker(includedGraph, excludedGraph, config.getEventsQueueBufferSize());
     }
 
 }

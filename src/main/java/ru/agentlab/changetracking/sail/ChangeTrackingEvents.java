@@ -8,15 +8,16 @@ import reactor.core.scheduler.Schedulers;
 public class ChangeTrackingEvents {
 
     private final Sinks.Many<TransactionChanges> sink;
+    private final Sinks.EmitFailureHandler retryHandler = (ignore, emitResult) -> emitResult.equals(Sinks.EmitResult.FAIL_NON_SERIALIZED);
     private final Scheduler defaultScheduler;
 
-    public ChangeTrackingEvents() {
-        sink = Sinks.many().multicast().onBackpressureBuffer();
+    public ChangeTrackingEvents(int eventsBufferSize) {
+        sink = Sinks.many().multicast().onBackpressureBuffer(eventsBufferSize, false);
         defaultScheduler = Schedulers.newSingle("changetracking");
     }
 
-    public Sinks.EmitResult nextEvent(TransactionChanges changes) {
-        return sink.tryEmitNext(changes);
+    public void nextEvent(TransactionChanges changes) {
+        sink.emitNext(changes, retryHandler);
     }
 
     public Flux<TransactionChanges> events() {
