@@ -81,5 +81,8 @@ public class ChangeTrackerConfig extends AbstractDelegatingSailImplConfig {
                             .filter(obj -> obj instanceof IRI)
                             .map(obj -> (IRI) obj)
                             .collect(Collectors.toSet());
+        eventsQueueBufferSize = Models.getPropertyLiteral(graph, implNode, ChangeTrackerSchema.EVENTS_BUFFER_SIZE)
+                                      .map(Literal::intValue)
+                                      .orElse(DEFAULT_EVENTS_QUEUE_BUFFER_SIZE);
     }
 }

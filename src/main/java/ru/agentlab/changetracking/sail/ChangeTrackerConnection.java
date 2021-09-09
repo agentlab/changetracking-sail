@@ -152,8 +152,7 @@ public class ChangeTrackerConnection extends NotifyingSailConnectionWrapper {
     }
 
     @Override
-    public void removeStatements(Resource subj, IRI pred, Value obj, Resource... contexts)
-            throws SailException {
+    public void removeStatements(Resource subj, IRI pred, Value obj, Resource... contexts) throws SailException {
         try {
             readOnlyHandler.removeStatements(subj, pred, obj, contexts);
             super.removeStatements(subj, pred, obj, contexts);
