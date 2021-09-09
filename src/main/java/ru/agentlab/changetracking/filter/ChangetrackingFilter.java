@@ -19,29 +19,22 @@ public class ChangetrackingFilter {
         private List<FilteringPattern> patterns = new ArrayList<>();
         private MatchingStrategy strategy = MatchingStrategy.ALL_PATTERNS;
 
-        public Builder addPropertyPattern(IRI predicate,
-                                          Value object,
-                                          Filtering filtering) {
-            return addPattern(new PropertyPattern(
-                    predicate,
-                    object,
-                    filtering,
-                    MatchingStrategy.ALL_PATTERNS,
-                    List.of()
+        public Builder addPropertyPattern(IRI predicate, Value object, Filtering filtering) {
+            return addPattern(new PropertyPattern(predicate,
+                                                  object,
+                                                  filtering,
+                                                  MatchingStrategy.ALL_PATTERNS,
+                                                  List.of()
             ));
         }
 
-        public Builder addPattern(Resource subject,
-                                  IRI predicate,
-                                  Value object,
-                                  Filtering filtering) {
-            return addPattern(new Pattern(
-                    subject,
-                    predicate,
-                    object,
-                    filtering,
-                    MatchingStrategy.ALL_PATTERNS,
-                    List.of()
+        public Builder addPattern(Resource subject, IRI predicate, Value object, Filtering filtering) {
+            return addPattern(new Pattern(subject,
+                                          predicate,
+                                          object,
+                                          filtering,
+                                          MatchingStrategy.ALL_PATTERNS,
+                                          List.of()
             ));
         }
 
@@ -50,11 +43,12 @@ public class ChangetrackingFilter {
                                   Value object,
                                   Filtering filtering,
                                   SubPattern... subpatterns) {
-            return addPattern(new Pattern(
-                    subject, predicate, object,
-                    filtering,
-                    MatchingStrategy.ALL_PATTERNS,
-                    Arrays.asList(subpatterns)
+            return addPattern(new Pattern(subject,
+                                          predicate,
+                                          object,
+                                          filtering,
+                                          MatchingStrategy.ALL_PATTERNS,
+                                          Arrays.asList(subpatterns)
             ));
         }
 
@@ -63,11 +57,12 @@ public class ChangetrackingFilter {
                                   Value object,
                                   Filtering filtering,
                                   List<SubPattern> subpatterns) {
-            return addPattern(new Pattern(
-                    subject, predicate, object,
-                    filtering,
-                    MatchingStrategy.ALL_PATTERNS,
-                    subpatterns
+            return addPattern(new Pattern(subject,
+                                          predicate,
+                                          object,
+                                          filtering,
+                                          MatchingStrategy.ALL_PATTERNS,
+                                          subpatterns
             ));
         }
 
@@ -162,6 +157,10 @@ public class ChangetrackingFilter {
             }
         }
         return Optional.of(model);
+    }
+
+    public boolean anyPatternMatches(Model model) {
+        return patterns.stream().anyMatch(pattern -> pattern.filter(model).size() != 0);
     }
 
     public Optional<TransactionChanges> mapMatched(TransactionChanges changes) {
